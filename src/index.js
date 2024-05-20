@@ -2,48 +2,87 @@ const readline = require('readline');
 const calcularINSS = require('./calculo_inss');
 const calcularImpostoRenda = require('./calculo_imposto_renda');
 const calcularSalarioLiquido = require('./calculo_salario_liquido');
+const validaCPF = require('./validaCPF');
 
 const input = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-input.question('Digite o salário bruto: ', (salario) => {
-  const salarioBruto = parseFloat(salario);
+function getMesExtenso(mes) {
+  const meses = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+  return meses[mes - 1];
+}
 
-  if (isNaN(salarioBruto)) {
-    console.log('Por favor, insira um número válido para o salário bruto.');
-    input.close();
-    return;
-  }
-
-  input.question('Digite outros descontos: ', (descontos) => {
-    const outrosDescontos = parseFloat(descontos);
-
-    if (isNaN(outrosDescontos)) {
-      console.log('Por favor, insira um número válido para outros descontos.');
+input.question('Digite o nome do funcionário: ', (nome) => {
+  input.question('Digite o CPF do funcionário: ', (cpf) => {
+    if (!validaCPF(cpf)) {
+      console.log('CPF inválido.');
       input.close();
       return;
     }
 
-    console.log(`O valor do salário bruto é: R$ ${salarioBruto}`);
+    input.question('Digite o mês do pagamento (Numérico): ', (mes) => {
+      const mesNumero = parseInt(mes);
+      if (isNaN(mesNumero) || mesNumero < 1 || mesNumero > 12) {
+        console.log('Por favor, insira um número válido para o mês.');
+        input.close();
+        return;
+      }
 
-    const valorINSS = calcularINSS(salarioBruto);
-    console.log(`O valor a ser pago de INSS é: R$ ${valorINSS}`);
+      input.question('Digite o salário bruto: ', (salario) => {
+        const salarioBruto = parseFloat(salario);
+        if (isNaN(salarioBruto)) {
+          console.log(
+            'Por favor, insira um número válido para o salário bruto.'
+          );
+          input.close();
+          return;
+        }
 
-    const valorImpostoRenda = calcularImpostoRenda(salarioBruto);
-    console.log(
-      `O valor a ser pago de Imposto de Renda é: R$ ${valorImpostoRenda}`
-    );
-    console.log(
-      `O valor dos descontos adicionais é (digite 0 caso não haja): R$ ${outrosDescontos}`
-    );
-    const salarioLiquido = calcularSalarioLiquido(
-      salarioBruto,
-      outrosDescontos
-    );
-    console.log(`O salário líquido é: R$ ${salarioLiquido}`);
+        input.question('Digite outros descontos: ', (descontos) => {
+          const outrosDescontos = parseFloat(descontos);
+          if (isNaN(outrosDescontos)) {
+            console.log(
+              'Por favor, insira um número válido para outros descontos.'
+            );
+            input.close();
+            return;
+          }
 
-    input.close();
+          const valorINSS = calcularINSS(salarioBruto);
+          const valorImpostoRenda = calcularImpostoRenda(salarioBruto);
+          const salarioLiquido = calcularSalarioLiquido(
+            salarioBruto,
+            outrosDescontos
+          );
+          const mesExtenso = getMesExtenso(mesNumero);
+
+          console.log('--- Folha de Pagamento ---');
+          console.log(`Nome: ${nome}`);
+          console.log(`CPF: ${cpf}`);
+          console.log(`Mês de Referência: ${mesExtenso}`);
+          console.log(`Salário Bruto: R$ ${salarioBruto.toFixed(2)}`);
+          console.log(`INSS: R$ ${valorINSS}`);
+          console.log(`Imposto de Renda: R$ ${valorImpostoRenda}`);
+          console.log(`Salário Líquido: R$ ${salarioLiquido}`);
+
+          input.close();
+        });
+      });
+    });
   });
 });
