@@ -1,5 +1,6 @@
 const readline = require('readline');
 const calcularINSS = require('./calculo_inss');
+const calcularImpostoRenda = require('./calculo_imposto_renda');
 
 const input = readline.createInterface({
   input: process.stdin,
@@ -13,6 +14,11 @@ input.question('Digite o salário bruto: ', (salario) => {
   } else {
     const valorINSS = calcularINSS(salarioBruto);
     console.log(`O valor a ser pago de INSS é: R$ ${valorINSS}`);
+
+    const valorImpostoRenda = calcularImpostoRenda(salarioBruto);
+    console.log(
+      `O valor a ser pago de Imposto de Renda é: R$ ${valorImpostoRenda}`
+    );
   }
   input.close();
 });
